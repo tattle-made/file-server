@@ -24,7 +24,6 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           name: tattletech/sharechat.api.file-server
           tags: ${{ steps.vars.outputs.sha_short }}
-          workdir: src/file-server/
       - name: Set New Image
         uses: steebchen/kubectl@master
         env:
