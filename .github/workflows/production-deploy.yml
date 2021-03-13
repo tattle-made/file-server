@@ -8,7 +8,6 @@ on:
 jobs:
   file-server:
     runs-on: ubuntu-latest
-    needs: changes
     steps:
       - uses: actions/checkout@v2
         with:
