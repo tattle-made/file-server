@@ -1,0 +1,23 @@
+{
+  "name": "file-server",
+  "version": "1.0.0",
+  "description": "a proxy file server for a s3 bucket",
+  "main": "application.js",
+  "scripts": {
+    "start": "nodemon application.js",
+    "run": "node application.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-rate-limit": "^5.2.3",
+    "mongodb": "^3.6.2",
+    "s3proxy": "^1.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.5"
+  }
+}

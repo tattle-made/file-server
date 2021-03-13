@@ -1,0 +1,56 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  file-server:
+    runs-on: ubuntu-latest
+    needs: changes
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: development
+      - name: Declare some variables
+        id: vars
+        shell: bash
+        run: |
+          echo "setting variables"
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          username: tattletech
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          name: tattletech/sharechat.api.file-server
+          tags: ${{ steps.vars.outputs.sha_short }}
+          workdir: src/file-server/
+      - name: Set New Image
+        uses: steebchen/kubectl@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.K8_SECRET_PROD }}
+          KUBECTL_VERSION: "1.15"
+        with:
+          args: '"set image deployment/sharechat-api-file-server sharechat-api-file-server=tattletech/sharechat.api.file-server:${{steps.vars.outputs.sha_short}}"'
+      - name: Verify deployment
+        uses: steebchen/kubectl@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.K8_SECRET_PROD }}
+          KUBECTL_VERSION: "1.15"
+        with:
+          args: '"rollout status deployment/sharechat-api-file-server"'
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [file-server]
+    if: ${{ always() }}
+    steps:
+      - name: Notify on Slack
+        uses: rtCamp/action-slack-notify@v2.0.0
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: "Deployed Sharechat Service to Staging"
+          SLACK_TITLE: "Sharechat Service staging-deploy workflow complete"
+          SLACK_COLOR: "#020637"
+          SLACK_ICON: https://tattle-media.s3.amazonaws.com/monogram-dark.svg
